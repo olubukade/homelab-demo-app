@@ -23,10 +23,9 @@ spec:
   - name: kubectl
     image: bitnami/kubectl:latest
     command:
-    - /bin/sh
+    - sleep
     args:
-    - -c
-    - cat
+    - "9999999"
     tty: true
 
   volumes:
