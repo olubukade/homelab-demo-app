@@ -23,7 +23,8 @@ spec:
   - name: kubectl
     image: bitnami/kubectl:latest
     command:
-    - sleep
+    - -c
+    - sleep infinity
     args:
     - "9999999"
     tty: true
