@@ -21,12 +21,9 @@ spec:
       mountPath: /kaniko/.docker
 
   - name: kubectl
-    image: bitnami/kubectl:latest
+    image: alpine/k8s:1.30.0
     command:
-    - -c
-    - sleep infinity
-    args:
-    - "9999999"
+    - cat
     tty: true
 
   volumes:
@@ -56,6 +53,7 @@ spec:
             steps {
                 sh 'ls -la'
                 sh 'cat Dockerfile'
+                sh 'cat k8s/deployment.yaml'
             }
         }
 
