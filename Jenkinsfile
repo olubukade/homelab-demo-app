@@ -19,7 +19,7 @@ spec:
     volumeMounts:
     - name: docker-config
       mountPath: /kaniko/.docker
-    
+
   - name: kubectl
     image: bitnami/kubectl:latest
     command:
@@ -36,7 +36,6 @@ spec:
       items:
       - key: .dockerconfigjson
         path: config.json
-
 """
         }
     }
@@ -72,18 +71,16 @@ spec:
                 }
             }
         }
+
         stage('Deploy to Kubernetes') {
-    steps {
-        container('kubectl') {
-            sh '''
-            kubectl apply -f k8s/deployment.yaml
-            kubectl rollout status deployment homelab-demo
-            '''
+            steps {
+                container('kubectl') {
+                    sh '''
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl rollout status deployment homelab-demo
+                    '''
+                }
+            }
         }
     }
 }
-            }
-        }  
-    }
-}
-
