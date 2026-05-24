@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: homelab-demo
-        image: homelab-demo:latest
-        imagePullPolicy: Never
+        image: docker.io/olubukade95/homelab-demo-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
 ---
