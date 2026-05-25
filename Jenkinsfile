@@ -57,6 +57,20 @@ spec:
                 sh 'cat k8s/deployment.yaml'
             }
         }
+        stage('SonarQube Code Scan') {
+    steps {
+        container('jnlp') {
+            script {
+                def scannerHome = tool 'SonarScanner'
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        ${scannerHome}/bin/sonar-scanner
+                    """
+                }
+            }
+        }
+    }
+}
 
         stage('Build and Push Image') {
             steps {
