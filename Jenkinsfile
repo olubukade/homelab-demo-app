@@ -124,6 +124,7 @@ spec:
                 channel: '#devops-alerts',
                 color: 'good',
                 tokenCredentialId: 'slack-token',
+                botUser: true,
                 message: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} completed successfully. ${env.BUILD_URL}"
             )
         }
@@ -133,6 +134,7 @@ spec:
                 channel: '#devops-alerts',
                 color: 'danger',
                 tokenCredentialId: 'slack-token',
+                botUser: true,
                 message: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. ${env.BUILD_URL}"
             )
         }
