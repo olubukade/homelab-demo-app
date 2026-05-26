@@ -27,6 +27,12 @@ spec:
     - cat
     tty: true
 
+  - name: trivy
+    image: aquasec/trivy:latest
+    command:
+    - cat
+    tty: true
+
   volumes:
   - name: docker-config
     secret:
@@ -57,20 +63,21 @@ spec:
                 sh 'cat k8s/deployment.yaml'
             }
         }
+
         stage('SonarQube Code Scan') {
-    steps {
-        container('jnlp') {
-            script {
-                def scannerHome = tool 'SonarScanner'
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                        ${scannerHome}/bin/sonar-scanner
-                    """
+            steps {
+                container('jnlp') {
+                    script {
+                        def scannerHome = tool 'SonarScanner'
+                        withSonarQubeEnv('SonarQube') {
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner
+                            """
+                        }
+                    }
                 }
             }
         }
-    }
-}
 
         stage('Build and Push Image') {
             steps {
@@ -80,6 +87,20 @@ spec:
                       --context=$(pwd) \
                       --dockerfile=Dockerfile \
                       --destination=$IMAGE_NAME:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                container('trivy') {
+                    sh '''
+                    trivy image \
+                      --severity HIGH,CRITICAL \
+                      --exit-code 1 \
+                      --ignore-unfixed \
+                      $IMAGE_NAME:latest
                     '''
                 }
             }
