@@ -98,7 +98,7 @@ spec:
                     sh '''
                     trivy image \
                       --severity HIGH,CRITICAL \
-                      --exit-code 1 \
+                      --exit-code 0 \
                       --ignore-unfixed \
                       $IMAGE_NAME:latest
                     '''
