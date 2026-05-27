@@ -8,6 +8,7 @@ kind: Pod
 
 spec:
   serviceAccountName: jenkins
+
   containers:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
@@ -22,7 +23,7 @@ spec:
       mountPath: /kaniko/.docker
 
   - name: kubectl
-    image: alpine/k8s:1.30.0
+    image: alpine/helm:3.14.4
     command:
     - cat
     tty: true
@@ -69,6 +70,7 @@ spec:
                 container('jnlp') {
                     script {
                         def scannerHome = tool 'SonarScanner'
+
                         withSonarQubeEnv('SonarQube') {
                             sh """
                                 ${scannerHome}/bin/sonar-scanner
@@ -110,8 +112,9 @@ spec:
             steps {
                 container('kubectl') {
                     sh '''
-                    helm upgrade --install homelab-demo ./helm/homelab-demo-app
-                    kubectl rollout status deployment homelab-demo
+                    helm upgrade --install homelab-demo ./helm/homelab-demo-app --namespace default
+
+                    kubectl rollout status deployment homelab-demo -n default
                     '''
                 }
             }
@@ -119,6 +122,7 @@ spec:
     }
 
     post {
+
         success {
             slackSend(
                 channel: '#devops-alerts',
