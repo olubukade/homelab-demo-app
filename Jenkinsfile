@@ -60,7 +60,7 @@ spec:
             steps {
                 sh 'ls -la'
                 sh 'cat Dockerfile'
-                sh 'cat k8s/deployment.yaml'
+                sh 'cat helm/homelab-demo-app/values.yaml'
             }
         }
 
@@ -106,11 +106,11 @@ spec:
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy with Helm') {
             steps {
                 container('kubectl') {
                     sh '''
-                    kubectl apply -f k8s/deployment.yaml
+                    helm upgrade --install homelab-demo ./helm/homelab-demo-app
                     kubectl rollout status deployment homelab-demo
                     '''
                 }
