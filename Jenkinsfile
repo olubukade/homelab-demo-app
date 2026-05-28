@@ -23,7 +23,7 @@ spec:
       mountPath: /kaniko/.docker
 
   - name: kubectl
-    image: alpine/helm:3.14.4
+    image: dtzar/helm-kubectl:3.14.4
     command:
     - cat
     tty: true
@@ -113,7 +113,6 @@ spec:
                 container('kubectl') {
                     sh '''
                     helm upgrade --install homelab-demo ./helm/homelab-demo-app --namespace default
-
                     kubectl rollout status deployment homelab-demo -n default
                     '''
                 }
