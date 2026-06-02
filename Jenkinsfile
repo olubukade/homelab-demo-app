@@ -119,7 +119,7 @@ spec:
 
                     git add helm/homelab-demo-app/values.yaml
                     git commit -m "Update image tag to build $BUILD_NUMBER" || echo "No changes to commit"
-                    git push origin main
+                    git push origin HEAD:main
                     '''
                 }
             }
