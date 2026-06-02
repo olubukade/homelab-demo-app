@@ -111,16 +111,23 @@ spec:
         stage('Update Helm Image Tag') {
             steps {
                 container('jnlp') {
-                    sh '''
-                    sed -i "s/tag: .*/tag: $BUILD_NUMBER/" helm/homelab-demo-app/values.yaml
+                    withCredentials([usernamePassword(
+                        credentialsId: 'github-token',
+                        usernameVariable: 'GIT_USERNAME',
+                        passwordVariable: 'GIT_TOKEN'
+                    )]) {
+                        sh '''
+                        sed -i "s/tag: .*/tag: $BUILD_NUMBER/" helm/homelab-demo-app/values.yaml
 
-                    git config user.email "jenkins@homelab.local"
-                    git config user.name "Jenkins CI"
+                        git config user.email "jenkins@homelab.local"
+                        git config user.name "Jenkins CI"
 
-                    git add helm/homelab-demo-app/values.yaml
-                    git commit -m "Update image tag to build $BUILD_NUMBER" || echo "No changes to commit"
-                    git push origin HEAD:main
-                    '''
+                        git add helm/homelab-demo-app/values.yaml
+                        git commit -m "Update image tag to build $BUILD_NUMBER" || echo "No changes to commit"
+
+                        git push https://$GIT_USERNAME:$GIT_TOKEN@github.com/olubukade/homelab-demo-app.git HEAD:main
+                        '''
+                    }
                 }
             }
         }
