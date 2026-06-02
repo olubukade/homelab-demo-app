@@ -88,7 +88,7 @@ spec:
                     /kaniko/executor \
                       --context=$(pwd) \
                       --dockerfile=Dockerfile \
-                      --destination=$IMAGE_NAME:latest
+                      --destination=$IMAGE_NAME:$BUILD_NUMBER
                     '''
                 }
             }
@@ -102,7 +102,24 @@ spec:
                       --severity HIGH,CRITICAL \
                       --exit-code 0 \
                       --ignore-unfixed \
-                      $IMAGE_NAME:latest
+                      $IMAGE_NAME:$BUILD_NUMBER
+                    '''
+                }
+            }
+        }
+
+        stage('Update Helm Image Tag') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                    sed -i "s/tag: .*/tag: $BUILD_NUMBER/" helm/homelab-demo-app/values.yaml
+
+                    git config user.email "jenkins@homelab.local"
+                    git config user.name "Jenkins CI"
+
+                    git add helm/homelab-demo-app/values.yaml
+                    git commit -m "Update image tag to build $BUILD_NUMBER" || echo "No changes to commit"
+                    git push origin main
                     '''
                 }
             }
