@@ -110,7 +110,7 @@ spec:
 
         stage('Update Helm Image Tag') {
             steps {
-                container('kubectl') {
+                container('jnlp') {
                     sh '''
                     sed -i "s/tag: .*/tag: $BUILD_NUMBER/" helm/homelab-demo-app/values.yaml
 
