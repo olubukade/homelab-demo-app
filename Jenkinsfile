@@ -131,17 +131,6 @@ spec:
                 }
             }
         }
-
-        stage('Deploy with Helm') {
-            steps {
-                container('kubectl') {
-                    sh '''
-                    helm upgrade --install homelab-demo ./helm/homelab-demo-app --namespace default
-                    kubectl rollout status deployment homelab-demo -n default
-                    '''
-                }
-            }
-        }
     }
 
     post {
@@ -152,7 +141,7 @@ spec:
                 color: 'good',
                 tokenCredentialId: 'slack-token',
                 botUser: true,
-                message: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} completed successfully. ${env.BUILD_URL}"
+                message: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} completed successfully. ArgoCD will deploy from Git. ${env.BUILD_URL}"
             )
         }
 
