@@ -34,6 +34,12 @@ spec:
     - cat
     tty: true
 
+  - name: python
+    image: python:3.12-slim
+    command:
+    - cat
+    tty: true
+
   volumes:
   - name: docker-config
     secret:
@@ -47,6 +53,7 @@ spec:
 
     environment {
         IMAGE_NAME = "docker.io/olubukade95/homelab-demo-app"
+        APP_URL = "http://10.0.0.124:32361"
     }
 
     stages {
@@ -59,9 +66,62 @@ spec:
 
         stage('Verify Files') {
             steps {
-                sh 'ls -la'
-                sh 'cat Dockerfile'
-                sh 'cat helm/homelab-demo-app/values.yaml'
+                sh '''
+                ls -la
+                cat app.py
+                cat Dockerfile
+                cat requirements.txt
+                cat requirements-dev.txt
+                cat sonar-project.properties
+                cat helm/homelab-demo-app/values.yaml
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                container('python') {
+                    sh '''
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    pip install -r requirements-dev.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                container('python') {
+                    sh '''
+                    PYTHONPATH=. pytest -v
+                    '''
+                }
+            }
+        }
+
+        stage('Code Coverage') {
+            steps {
+                container('python') {
+                    sh '''
+                    PYTHONPATH=. pytest --cov=. --cov-report=xml
+                    ls -la coverage.xml
+                    '''
+                }
+            }
+        }
+
+        stage('Trivy SCA Filesystem Scan') {
+            steps {
+                container('trivy') {
+                    sh '''
+                    trivy fs \
+                      --severity HIGH,CRITICAL \
+                      --exit-code 0 \
+                      --scanners vuln,secret \
+                      .
+                    '''
+                }
             }
         }
 
@@ -73,9 +133,19 @@ spec:
 
                         withSonarQubeEnv('SonarQube') {
                             sh """
-                                ${scannerHome}/bin/sonar-scanner
+                            ${scannerHome}/bin/sonar-scanner
                             """
                         }
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                container('jnlp') {
+                    timeout(time: 3, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
                     }
                 }
             }
@@ -115,7 +185,7 @@ spec:
                         credentialsId: 'github-token',
                         usernameVariable: 'GIT_USERNAME',
                         passwordVariable: 'GIT_TOKEN'
-                    )]) {
+                     )]) {
                         sh '''
                         sed -i "s/tag: .*/tag: $BUILD_NUMBER/" helm/homelab-demo-app/values.yaml
 
@@ -128,6 +198,20 @@ spec:
                         git push https://$GIT_USERNAME:$GIT_TOKEN@github.com/olubukade/homelab-demo-app.git HEAD:main
                         '''
                     }
+                }
+            }
+        }
+
+        stage('Smoke Test') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                    echo "Waiting for ArgoCD/Kubernetes deployment to complete..."
+                    sleep 45
+
+                    echo "Testing application health endpoint..."
+                    curl -f $APP_URL/health
+                    '''
                 }
             }
         }
