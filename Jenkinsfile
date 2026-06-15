@@ -53,7 +53,7 @@ spec:
 
     environment {
         IMAGE_NAME = "docker.io/olubukade95/homelab-demo-app"
-        APP_URL = "http://10.0.0.124:32361"
+        APP_URL = "http://10.0.0.124:32670"
     }
 
     stages {
