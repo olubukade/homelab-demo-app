@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: docker.io/olubukade95/homelab-demo-app
-  tag: 508
+  tag: 509
   pullPolicy: Always
 
 service:
